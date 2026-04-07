@@ -55,3 +55,18 @@ apps/api
 - SQL を採用する場合でも、web 層から SQL へ直接依存させない
 - Cloud Run 向け設定は `deploy/` に寄せ、アプリ本体と混ぜない
 - 月次サマリは更新系ドメインとは分離し、参照用 usecase として扱う
+
+## 実行
+
+ローカル開発では以下の環境変数を使う。
+
+- `DATABASE_URL`
+- `ALLOW_INSECURE_AUTH=true`
+- `PORT=8080`
+
+`ALLOW_INSECURE_AUTH=true` のときは `Authorization` の代わりに以下ヘッダを使える。
+
+- `X-Debug-Firebase-Uid`
+- `X-Debug-Display-Name`
+
+デプロイ関連は [deploy/README.md](/Users/aktnb/git/kakeibo-app/apps/api/deploy/README.md) を参照。
