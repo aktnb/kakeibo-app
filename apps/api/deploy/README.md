@@ -30,6 +30,22 @@ docker build -f apps/api/deploy/Dockerfile -t zangaka-mori-api ./apps/api
 
 ## Local Setup
 
+一番簡単なのは `apps/api` で以下を実行すること:
+
+```bash
+make dev
+```
+
+これで以下をまとめて行う。
+
+- `.env.local` の作成
+- PostgreSQL の起動
+- PostgreSQL の healthcheck 待ち
+- 初回 migration の適用
+- API の起動
+
+個別実行したい場合:
+
 PostgreSQL をローカルで立ち上げる:
 
 ```bash
@@ -49,6 +65,16 @@ cp apps/api/deploy/.env.local.example apps/api/.env.local
 ```
 
 その場合は `.env.local` の `DATABASE_URL` も同じポートに合わせる。
+
+`Makefile` を使うなら:
+
+```bash
+cd apps/api
+make init-env
+make db-up
+make migrate
+make run
+```
 
 migration を流す:
 
