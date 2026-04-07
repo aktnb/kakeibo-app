@@ -24,7 +24,7 @@ export default async function Home() {
   const net = data.monthlyTotals.net;
 
   return (
-    <main className="min-h-screen bg-slate-100">
+    <div className="min-h-screen">
       {/* ヘッダー */}
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
@@ -213,7 +213,7 @@ export default async function Home() {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 }
 
