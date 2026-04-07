@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Web MVP
+
+`apps/web` は残高の森の MVP 向け Next.js フロントエンドです。
+
+現状は以下の 2 モードで動きます。
+
+- `KAKEIBO_API_BASE_URL` と `KAKEIBO_BEARER_TOKEN` がある場合は API からデータ取得
+- 未設定の場合はモックデータで UI を表示
 
 ## Getting Started
 
-First, run the development server:
+1. 環境変数を作成します。
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. 開発サーバーを起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. `http://localhost:3000` を開きます。
 
-## Learn More
+## Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+KAKEIBO_API_BASE_URL=http://localhost:8080
+KAKEIBO_BEARER_TOKEN=your-firebase-id-token
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Bearer token には Firebase Auth の ID token を使います。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Current Scope
 
-## Deploy on Vercel
+- 月次サマリー
+- 口座残高一覧
+- 支出カテゴリ内訳
+- 直近明細一覧
+- 明細入力仕様の確認用 UI
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+まだ CRUD 操作はつないでいません。まずは MVP として必要な画面の骨格と API 接続面を固定する段階です。
