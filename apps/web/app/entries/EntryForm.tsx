@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { createEntryAction, updateEntryAction } from "./actions";
 import type { Account, ActionState, Category, Entry } from "../../lib/types";
 
@@ -31,8 +31,10 @@ export default function EntryForm({ accounts, categories, editTarget, onCancel }
   }, [state, isEdit]);
 
   const defaultType = editTarget?.type ?? "expense";
+  const [selectedType, setSelectedType] = useState<"income" | "expense">(defaultType);
   const incomeCategories = categories.filter((c) => c.kind === "income" && !c.isArchived);
   const expenseCategories = categories.filter((c) => c.kind === "expense" && !c.isArchived);
+  const filteredCategories = selectedType === "income" ? incomeCategories : expenseCategories;
   const activeAccounts = accounts.filter((a) => !a.isArchived);
 
   return (
@@ -51,6 +53,7 @@ export default function EntryForm({ accounts, categories, editTarget, onCancel }
               name="type"
               value={t}
               defaultChecked={defaultType === t}
+              onChange={() => setSelectedType(t)}
               className="sr-only"
             />
             {t === "expense" ? "支出" : "収入"}
@@ -108,30 +111,20 @@ export default function EntryForm({ accounts, categories, editTarget, onCancel }
       {/* カテゴリ */}
       <div>
         <label className="mb-1 block text-xs font-semibold text-slate-500">カテゴリ</label>
-        {categories.filter((c) => !c.isArchived).length === 0 ? (
+        {filteredCategories.length === 0 ? (
           <p className="text-xs text-amber-600">カテゴリがありません。先にカテゴリを追加してください。</p>
         ) : (
           <select
+            key={selectedType}
             name="categoryId"
-            defaultValue={editTarget?.categoryId ?? ""}
+            defaultValue={editTarget?.type === selectedType ? (editTarget?.categoryId ?? "") : ""}
             required
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
           >
             <option value="" disabled>選択してください</option>
-            {expenseCategories.length > 0 && (
-              <optgroup label="支出">
-                {expenseCategories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </optgroup>
-            )}
-            {incomeCategories.length > 0 && (
-              <optgroup label="収入">
-                {incomeCategories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </optgroup>
-            )}
+            {filteredCategories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
           </select>
         )}
       </div>
