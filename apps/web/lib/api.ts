@@ -1,3 +1,4 @@
+import { getSessionToken } from "./session";
 import type {
   Account,
   AccountBalances,
@@ -24,7 +25,6 @@ type RequestOptions = {
 };
 
 const API_BASE_URL = process.env.KAKEIBO_API_BASE_URL;
-const BEARER_TOKEN = process.env.KAKEIBO_BEARER_TOKEN;
 const DEBUG_UID = process.env.KAKEIBO_DEBUG_UID;
 const DEBUG_DISPLAY_NAME = process.env.KAKEIBO_DEBUG_DISPLAY_NAME;
 
@@ -36,7 +36,8 @@ function buildJSTMonth(): string {
   return `${year}-${month}`;
 }
 
-function getAuthHeaders(): Record<string, string> {
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  // ローカル開発: デバッグ認証
   if (DEBUG_UID) {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -47,12 +48,16 @@ function getAuthHeaders(): Record<string, string> {
     }
     return headers;
   }
-  if (BEARER_TOKEN) {
+
+  // 本番: Cookie から Firebase ID token を取得
+  const token = await getSessionToken();
+  if (token) {
     return {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${BEARER_TOKEN}`,
+      Authorization: `Bearer ${token}`,
     };
   }
+
   return { "Content-Type": "application/json" };
 }
 
@@ -70,7 +75,7 @@ async function request<T>({ path, method = "GET", searchParams, body }: RequestO
 
   const res = await fetch(url, {
     method,
-    headers: getAuthHeaders(),
+    headers: await getAuthHeaders(),
     body: body !== undefined ? JSON.stringify(body) : undefined,
     cache: "no-store",
   });
