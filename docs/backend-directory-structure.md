@@ -30,8 +30,8 @@ apps/api
 │   ├── handler/
 │   ├── middleware/
 │   ├── request/
-│   ├── response/
-│   └── router/
+│   └── response/
+├── internal/router/
 ├── internal/repository/
 │   ├── postgres/
 │   └── transaction/
@@ -90,6 +90,10 @@ HTTP 固有の責務を domain / usecase から切り離すため。JSON の sha
 - category handler
 - entry handler
 - summary handler
+
+### `internal/router`
+
+ルーティング定義を集約するため。認証ミドルウェアの適用範囲と、各 handler の公開エンドポイントをここでまとめて管理する。
 
 ### `internal/repository`
 

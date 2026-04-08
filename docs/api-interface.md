@@ -18,9 +18,6 @@ MVP で先に固定するリソース:
 - accounts
 - categories
 - entries
-
-保留しながら検討するリソース:
-
 - summary
 
 ## 認証と初期化
@@ -212,7 +209,7 @@ query:
 - `categoryId=...`
 - `type=income|expense`
 - `pageSize=50`
-- `pageToken=...`
+- `pageToken=0..n`
 
 ### `POST /api/v1/entries`
 
@@ -241,6 +238,7 @@ request:
 
 ```json
 {
+  "accountId": "acc_02",
   "occurredOn": "2026-04-07",
   "categoryId": "cat_02",
   "amount": 1500,
@@ -261,199 +259,13 @@ response `204`
 
 ## Summary
 
-summary API はまだ確定させない。
+summary は read-only API として実装済み。対象は month 単位で、household 単位の集計を返す。
 
-理由:
-
-- 月次サマリに何を含めるかで DB 設計が変わる
-- account の `currentBalance` を真実の値にするか、entry 集計結果に寄せるかを決める必要がある
-- フロントエンドが必要とする UI 単位を見て shape を切った方がよい
-
-先に固定してよい論点:
-
-- summary は read-only API にする
-- 対象は month 単位にする
-- household 単位の集計にする
-
-候補 A:
-
-- `GET /api/v1/summary/monthly?month=2026-04`
-- 1 API で totals, category breakdown, account balances をまとめて返す
-
-response:
-
-```json
-{
-  "month": "2026-04",
-  "totals": {
-    "income": 320000,
-    "expense": 185000,
-    "net": 135000
-  },
-  "categoryBreakdown": {
-    "expense": [
-      {
-        "categoryId": "cat_food",
-        "categoryName": "食費",
-        "amount": 42000,
-        "ratio": 0.227
-      },
-      {
-        "categoryId": "cat_rent",
-        "categoryName": "家賃",
-        "amount": 90000,
-        "ratio": 0.486
-      }
-    ],
-    "income": [
-      {
-        "categoryId": "cat_salary",
-        "categoryName": "給与",
-        "amount": 300000,
-        "ratio": 0.938
-      }
-    ]
-  },
-  "accountBalances": [
-    {
-      "accountId": "acc_cash",
-      "accountName": "現金",
-      "accountType": "cash",
-      "balance": 25000
-    },
-    {
-      "accountId": "acc_bank",
-      "accountName": "住信SBI",
-      "accountType": "bank",
-      "balance": 380000
-    }
-  ]
-}
-```
-
-候補 B:
+実装済みエンドポイント:
 
 - `GET /api/v1/summary/monthly-totals?month=2026-04`
 - `GET /api/v1/summary/category-breakdown?month=2026-04&type=expense`
 - `GET /api/v1/summary/account-balances?month=2026-04`
-
-`GET /api/v1/summary/monthly-totals?month=2026-04`
-
-```json
-{
-  "month": "2026-04",
-  "income": 320000,
-  "expense": 185000,
-  "net": 135000
-}
-```
-
-`GET /api/v1/summary/category-breakdown?month=2026-04&type=expense`
-
-```json
-{
-  "month": "2026-04",
-  "type": "expense",
-  "total": 185000,
-  "items": [
-    {
-      "categoryId": "cat_food",
-      "categoryName": "食費",
-      "amount": 42000,
-      "ratio": 0.227,
-      "transactionCount": 18
-    },
-    {
-      "categoryId": "cat_rent",
-      "categoryName": "家賃",
-      "amount": 90000,
-      "ratio": 0.486,
-      "transactionCount": 1
-    }
-  ]
-}
-```
-
-`GET /api/v1/summary/account-balances?month=2026-04`
-
-```json
-{
-  "month": "2026-04",
-  "items": [
-    {
-      "accountId": "acc_cash",
-      "accountName": "現金",
-      "accountType": "cash",
-      "openingBalance": 20000,
-      "closingBalance": 25000,
-      "delta": 5000
-    },
-    {
-      "accountId": "acc_bank",
-      "accountName": "住信SBI",
-      "accountType": "bank",
-      "openingBalance": 245000,
-      "closingBalance": 380000,
-      "delta": 135000
-    }
-  ]
-}
-```
-
-候補 C:
-
-- `GET /api/v1/summary/monthly-dashboard?month=2026-04`
-- ダッシュボード画面専用の shape に寄せる
-
-response:
-
-```json
-{
-  "month": "2026-04",
-  "headline": {
-    "income": 320000,
-    "expense": 185000,
-    "net": 135000
-  },
-  "topExpenseCategories": [
-    {
-      "categoryId": "cat_rent",
-      "categoryName": "家賃",
-      "amount": 90000
-    },
-    {
-      "categoryId": "cat_food",
-      "categoryName": "食費",
-      "amount": 42000
-    }
-  ],
-  "accounts": [
-    {
-      "accountId": "acc_bank",
-      "accountName": "住信SBI",
-      "closingBalance": 380000
-    }
-  ]
-}
-```
-
-現時点の推奨:
-
-- 最初は候補 B
-- 理由はレスポンス責務が明確で、画面ごとの必要データに合わせやすいため
-
-## Summary の推奨 shape
-
-MVP では候補 B で始めるのが一番堅い。
-
-理由:
-
-- totals, category, account で集計軸が違う
-- SQL を分けやすい
-- フロント側で不要なデータを抱えなくて済む
-- 将来 dashboard 専用 API を追加しても既存 API を壊しにくい
-
-### 推奨 1: monthly totals
 
 `GET /api/v1/summary/monthly-totals?month=2026-04`
 
@@ -467,19 +279,6 @@ MVP では候補 B で始めるのが一番堅い。
 }
 ```
 
-この API の用途:
-
-- ダッシュボード上部の KPI
-- 前月比較を後で追加しやすい
-
-将来追加しやすい項目:
-
-- `previousMonthIncome`
-- `previousMonthExpense`
-- `previousMonthNet`
-
-### 推奨 2: category breakdown
-
 `GET /api/v1/summary/category-breakdown?month=2026-04&type=expense`
 
 ```json
@@ -489,34 +288,22 @@ MVP では候補 B で始めるのが一番堅い。
   "total": 185000,
   "items": [
     {
-      "categoryId": "cat_rent",
-      "categoryName": "家賃",
-      "amount": 90000,
-      "ratio": 0.486,
-      "transactionCount": 1
-    },
-    {
-      "categoryId": "cat_food",
+      "categoryID": "cat_food",
       "categoryName": "食費",
       "amount": 42000,
       "ratio": 0.227,
       "transactionCount": 18
+    },
+    {
+      "categoryID": "cat_rent",
+      "categoryName": "家賃",
+      "amount": 90000,
+      "ratio": 0.486,
+      "transactionCount": 1
     }
   ]
 }
 ```
-
-この API の用途:
-
-- 円グラフ
-- カテゴリ別ランキング
-
-設計上の注意:
-
-- `ratio` は API 側で返すとフロント実装が軽い
-- `transactionCount` は UX 上かなり有用
-
-### 推奨 3: account balances
 
 `GET /api/v1/summary/account-balances?month=2026-04`
 
@@ -526,7 +313,7 @@ MVP では候補 B で始めるのが一番堅い。
   "totalClosingBalance": 405000,
   "items": [
     {
-      "accountId": "acc_cash",
+      "accountID": "acc_cash",
       "accountName": "現金",
       "accountType": "cash",
       "openingBalance": 20000,
@@ -534,7 +321,7 @@ MVP では候補 B で始めるのが一番堅い。
       "delta": 5000
     },
     {
-      "accountId": "acc_bank",
+      "accountID": "acc_bank",
       "accountName": "住信SBI",
       "accountType": "bank",
       "openingBalance": 245000,
@@ -545,25 +332,10 @@ MVP では候補 B で始めるのが一番堅い。
 }
 ```
 
-この API の用途:
+validation:
 
-- 月末時点の口座別残高一覧
-- 資産のざっくり把握
-
-設計上の注意:
-
-- `closingBalance` を月末時点の値として返す
-- `currentBalance` とは意味が違うので summary 側では使わない
-
-## Summary で最初は入れないもの
-
-- 日次推移
-- 予算比較
-- 前月比較
-- キャッシュフロー予測
-- 振替込みの純資産推移
-
-これらは UI と計算ルールが固まってから別 API にした方がよい。
+- `month` は必須で `YYYY-MM` 形式
+- `type` は `income|expense`
 
 ## エラーフォーマット
 
@@ -590,7 +362,8 @@ MVP では候補 B で始めるのが一番堅い。
 ## 命名ルール
 
 - path は複数形 resource を使う
-- JSON は camelCase
+- JSON は基本 camelCase
+- summary response の ID 系フィールドは現実装では `categoryID` / `accountID`
 - 金額は整数で扱い、通貨最小単位を使う
 - 日付は `YYYY-MM-DD`
 - 日時は RFC3339
@@ -599,4 +372,4 @@ MVP では候補 B で始めるのが一番堅い。
 
 1. account の `type` 列挙値
 2. category の初期データをサーバーで自動投入するか
-3. summary を候補 A と候補 B のどちらで始めるか
+3. summary response の ID フィールド命名を `accountID` / `categoryID` のままにするか、他 API と合わせて `accountId` / `categoryId` に寄せるか
