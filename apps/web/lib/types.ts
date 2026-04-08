@@ -112,7 +112,7 @@ export type UpdateEntryRequest = {
 
 export type CreateAccountRequest = {
   name: string;
-  type: "bank" | "cash" | "credit";
+  type: "bank" | "cash" | "credit" | "ewallet";
   currency: string;
   openingBalance: number;
 };

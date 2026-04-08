@@ -15,6 +15,7 @@ const accountTypeOptions = [
   { value: "bank", label: "銀行口座" },
   { value: "cash", label: "現金" },
   { value: "credit", label: "クレジット" },
+  { value: "ewallet", label: "電子マネー" },
 ] as const;
 
 export default function AccountForm({ editTarget, onCancel }: Props) {

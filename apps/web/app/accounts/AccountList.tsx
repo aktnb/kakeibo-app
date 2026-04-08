@@ -21,6 +21,7 @@ const typeLabel: Record<string, string> = {
   bank: "銀行口座",
   cash: "現金",
   credit: "クレジット",
+  ewallet: "電子マネー",
 };
 
 const IDLE: ActionState<Account> = { status: "idle" };
