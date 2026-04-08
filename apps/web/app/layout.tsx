@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import NavTabs from "./ui/NavTabs";
 import { AuthSync } from "./ui/AuthSync";
+import FloatingEntryWrapper from "./ui/FloatingEntryWrapper";
 
 export const metadata: Metadata = {
   title: "残高の森",
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-slate-100">
         <AuthSync />
         <main className="flex-1">{children}</main>
+        <FloatingEntryWrapper />
         <NavTabs />
       </body>
     </html>

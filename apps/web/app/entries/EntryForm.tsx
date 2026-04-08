@@ -9,6 +9,7 @@ type Props = {
   categories: Category[];
   editTarget?: Entry | null;
   onCancel?: () => void;
+  onSuccess?: () => void;
 };
 
 const IDLE: ActionState<Entry> = { status: "idle" };
@@ -18,7 +19,7 @@ function todayJST(): string {
   return now.toISOString().slice(0, 10);
 }
 
-export default function EntryForm({ accounts, categories, editTarget, onCancel }: Props) {
+export default function EntryForm({ accounts, categories, editTarget, onCancel, onSuccess }: Props) {
   const isEdit = !!editTarget;
   const action = isEdit ? updateEntryAction : createEntryAction;
   const [state, formAction, pending] = useActionState(action, IDLE);
@@ -27,8 +28,9 @@ export default function EntryForm({ accounts, categories, editTarget, onCancel }
   useEffect(() => {
     if (state.status === "success" && !isEdit) {
       formRef.current?.reset();
+      onSuccess?.();
     }
-  }, [state, isEdit]);
+  }, [state, isEdit, onSuccess]);
 
   const defaultType = editTarget?.type ?? "expense";
   const [selectedType, setSelectedType] = useState<"income" | "expense">(defaultType);

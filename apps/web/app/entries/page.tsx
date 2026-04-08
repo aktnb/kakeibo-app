@@ -1,6 +1,5 @@
 import { createSession, getAccounts, getCategories, getEntries } from "../../lib/api";
 import type { Account, Category, Entry } from "../../lib/types";
-import EntryForm from "./EntryForm";
 import EntryList from "./EntryList";
 
 function buildJSTMonth(): string {
@@ -33,6 +32,8 @@ export default async function EntriesPage() {
     apiError = true;
   }
 
+  // accounts, categories は EntryList での表示名解決に使用
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-slate-200 bg-white">
@@ -47,12 +48,6 @@ export default async function EntriesPage() {
             API に接続できません。<code className="mx-1 rounded bg-amber-100 px-1 text-xs">make dev</code> で API を起動してください。
           </div>
         )}
-
-        {/* 入力フォーム */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-400">新規登録</h2>
-          <EntryForm accounts={accounts} categories={categories} />
-        </section>
 
         {/* 一覧 */}
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
