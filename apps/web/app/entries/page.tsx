@@ -1,4 +1,4 @@
-import { getAccounts, getCategories, getEntries } from "../../lib/api";
+import { createSession, getAccounts, getCategories, getEntries } from "../../lib/api";
 import type { Account, Category, Entry } from "../../lib/types";
 import EntryForm from "./EntryForm";
 import EntryList from "./EntryList";
@@ -13,7 +13,9 @@ function buildJSTMonth(): string {
 export default async function EntriesPage() {
   const month = buildJSTMonth();
   const from = `${month}-01`;
-  const to = `${month}-31`;
+  const [year, mon] = month.split("-").map(Number);
+  const lastDay = new Date(year, mon, 0).getDate();
+  const to = `${month}-${String(lastDay).padStart(2, "0")}`;
 
   let accounts: Account[] = [];
   let categories: Category[] = [];
@@ -21,6 +23,7 @@ export default async function EntriesPage() {
   let apiError = false;
 
   try {
+    await createSession();
     [accounts, categories, entries] = await Promise.all([
       getAccounts(),
       getCategories(),

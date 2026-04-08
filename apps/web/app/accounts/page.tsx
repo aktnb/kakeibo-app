@@ -1,4 +1,4 @@
-import { getAccounts } from "../../lib/api";
+import { createSession, getAccounts } from "../../lib/api";
 import type { Account } from "../../lib/types";
 import AccountForm from "./AccountForm";
 import AccountList from "./AccountList";
@@ -8,6 +8,7 @@ export default async function AccountsPage() {
   let apiError = false;
 
   try {
+    await createSession();
     accounts = await getAccounts();
   } catch {
     apiError = true;

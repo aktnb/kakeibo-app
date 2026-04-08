@@ -1,4 +1,4 @@
-import { getCategories } from "../../lib/api";
+import { createSession, getCategories } from "../../lib/api";
 import type { Category } from "../../lib/types";
 import CategoryForm from "./CategoryForm";
 import CategoryList from "./CategoryList";
@@ -8,6 +8,7 @@ export default async function CategoriesPage() {
   let apiError = false;
 
   try {
+    await createSession();
     categories = await getCategories();
   } catch {
     apiError = true;

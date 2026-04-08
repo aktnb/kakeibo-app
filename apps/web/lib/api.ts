@@ -1,4 +1,3 @@
-import { getMockDashboardData } from "./mock-data";
 import type {
   Account,
   AccountBalances,
@@ -157,41 +156,40 @@ export async function deleteEntry(id: string): Promise<void> {
 export async function getDashboardData(): Promise<DashboardData> {
   const month = buildJSTMonth();
   const from = `${month}-01`;
-  const to = `${month}-31`;
+  const [year, mon] = month.split("-").map(Number);
+  const lastDay = new Date(year, mon, 0).getDate();
+  const to = `${month}-${String(lastDay).padStart(2, "0")}`;
 
-  try {
-    const [session, accounts, categories, entries, monthlyTotals, categoryBreakdown, accountBalances] =
-      await Promise.all([
-        getMe(),
-        getAccounts(),
-        getCategories(),
-        getEntries({ from, to, pageSize: 20 }),
-        request<MonthlyTotals>({
-          path: "/api/v1/summary/monthly-totals",
-          searchParams: { month },
-        }),
-        request<CategoryBreakdown>({
-          path: "/api/v1/summary/category-breakdown",
-          searchParams: { month, type: "expense" },
-        }),
-        request<AccountBalances>({
-          path: "/api/v1/summary/account-balances",
-          searchParams: { month },
-        }),
-      ]);
+  const session = await createSession();
 
-    return {
-      month,
-      source: "api",
-      session,
-      accounts,
-      categories,
-      entries,
-      monthlyTotals,
-      categoryBreakdown,
-      accountBalances,
-    };
-  } catch {
-    return getMockDashboardData();
-  }
+  const [accounts, categories, entries, monthlyTotals, categoryBreakdown, accountBalances] =
+    await Promise.all([
+      getAccounts(),
+      getCategories(),
+      getEntries({ from, to, pageSize: 20 }),
+      request<MonthlyTotals>({
+        path: "/api/v1/summary/monthly-totals",
+        searchParams: { month },
+      }),
+      request<CategoryBreakdown>({
+        path: "/api/v1/summary/category-breakdown",
+        searchParams: { month, type: "expense" },
+      }),
+      request<AccountBalances>({
+        path: "/api/v1/summary/account-balances",
+        searchParams: { month },
+      }),
+    ]);
+
+  return {
+    month,
+    source: "api",
+    session,
+    accounts,
+    categories,
+    entries,
+    monthlyTotals,
+    categoryBreakdown,
+    accountBalances,
+  };
 }
