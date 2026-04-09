@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"errors"
+	"net"
 	"net/http"
+	"net/netip"
 	"strings"
 
 	"github.com/aktnb/kakeibo-app/apps/api/internal/auth"
@@ -23,7 +25,7 @@ func NewAuthMiddleware(verifier auth.TokenVerifier, allowInsecureAuth bool) *Aut
 
 func (m *AuthMiddleware) Require(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if m.allowInsecureAuth {
+		if m.allowInsecureAuth && isLocalRequest(r) {
 			if principal := auth.PrincipalFromHeaders(r); principal != nil {
 				next.ServeHTTP(w, r.WithContext(auth.WithPrincipal(r.Context(), principal)))
 				return
@@ -52,6 +54,22 @@ func (m *AuthMiddleware) Require(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r.WithContext(auth.WithPrincipal(r.Context(), principal)))
 	})
+}
+
+func isLocalRequest(r *http.Request) bool {
+	host := r.Host
+	if parsedHost, _, err := net.SplitHostPort(host); err == nil {
+		host = parsedHost
+	}
+	if host == "localhost" {
+		return true
+	}
+	if len(host) >= 2 && host[0] == '[' && host[len(host)-1] == ']' {
+		host = host[1 : len(host)-1]
+	}
+
+	addr, err := netip.ParseAddr(host)
+	return err == nil && addr.IsLoopback()
 }
 
 func bearerToken(value string) string {

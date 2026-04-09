@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
-  // ローカル開発: デバッグ認証が設定されている場合は認証をスキップ
-  if (process.env.KAKEIBO_DEBUG_UID) {
-    return NextResponse.next();
-  }
-
   const { pathname } = request.nextUrl;
 
   // 認証不要のパス

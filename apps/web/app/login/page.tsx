@@ -9,21 +9,27 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const canUseLocalDebug =
+    process.env.NODE_ENV !== "production" &&
+    !!process.env.NEXT_PUBLIC_KAKEIBO_DEBUG_AUTH_ENABLED;
 
-  if (!isFirebaseConfigured) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100">
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-5 text-sm text-amber-700">
-          Firebase が未設定です。<code className="mx-1 rounded bg-amber-100 px-1 text-xs">NEXT_PUBLIC_FIREBASE_*</code> を設定してください。
-        </div>
-      </div>
-    );
+  async function handleAuth(action: () => Promise<void>) {
+    setError(null);
+    setLoading(true);
+
+    try {
+      await action();
+      router.push("/");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "ログインに失敗しました");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleGoogleSignIn() {
-    setError(null);
-    setLoading(true);
-    try {
+    await handleAuth(async () => {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(firebaseAuth!, provider);
       const idToken = await result.user.getIdToken();
@@ -34,14 +40,18 @@ export default function LoginPage() {
         body: JSON.stringify({ idToken }),
       });
       if (!res.ok) throw new Error("セッションの保存に失敗しました");
+    });
+  }
 
-      router.push("/");
-      router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "ログインに失敗しました");
-    } finally {
-      setLoading(false);
-    }
+  async function handleLocalSignIn() {
+    await handleAuth(async () => {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "debug" }),
+      });
+      if (!res.ok) throw new Error("ローカルログインに失敗しました");
+    });
   }
 
   return (
@@ -56,14 +66,32 @@ export default function LoginPage() {
           </div>
         )}
 
-        <button
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-        >
-          <GoogleIcon />
-          {loading ? "ログイン中..." : "Google でログイン"}
-        </button>
+        <div className="space-y-3">
+          {isFirebaseConfigured ? (
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+            >
+              <GoogleIcon />
+              {loading ? "ログイン中..." : "Google でログイン"}
+            </button>
+          ) : (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              Firebase が未設定です。<code className="mx-1 rounded bg-amber-100 px-1 text-xs">NEXT_PUBLIC_FIREBASE_*</code> を設定してください。
+            </div>
+          )}
+
+          {canUseLocalDebug && (
+            <button
+              onClick={handleLocalSignIn}
+              disabled={loading}
+              className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+            >
+              {loading ? "ログイン中..." : "ローカルユーザーでログイン"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

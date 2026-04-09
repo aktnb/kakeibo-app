@@ -1,4 +1,4 @@
-import { getSessionToken } from "./session";
+import { getSession } from "./session";
 import type {
   Account,
   AccountBalances,
@@ -28,6 +28,14 @@ const API_BASE_URL = process.env.KAKEIBO_API_BASE_URL;
 const DEBUG_UID = process.env.KAKEIBO_DEBUG_UID;
 const DEBUG_DISPLAY_NAME = process.env.KAKEIBO_DEBUG_DISPLAY_NAME;
 
+function isDebugAuthConfigured(): boolean {
+  return process.env.NODE_ENV !== "production" && !!DEBUG_UID;
+}
+
+function getDebugFirebaseUID(): string {
+  return `local:${DEBUG_UID!}`;
+}
+
 function buildJSTMonth(): string {
   // JST = UTC+9
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
@@ -37,11 +45,19 @@ function buildJSTMonth(): string {
 }
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-  // ローカル開発: デバッグ認証
-  if (DEBUG_UID) {
+  const session = await getSession();
+  if (!session) {
+    return { "Content-Type": "application/json" };
+  }
+
+  if (session.mode === "debug") {
+    if (!isDebugAuthConfigured()) {
+      throw new Error("Debug auth is not configured");
+    }
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      "X-Debug-Firebase-Uid": DEBUG_UID,
+      "X-Debug-Firebase-Uid": getDebugFirebaseUID(),
     };
     if (DEBUG_DISPLAY_NAME) {
       headers["X-Debug-Display-Name"] = DEBUG_DISPLAY_NAME;
@@ -49,16 +65,10 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     return headers;
   }
 
-  // 本番: Cookie から Firebase ID token を取得
-  const token = await getSessionToken();
-  if (token) {
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-  }
-
-  return { "Content-Type": "application/json" };
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session.token}`,
+  };
 }
 
 async function request<T>({ path, method = "GET", searchParams, body }: RequestOptions): Promise<T> {

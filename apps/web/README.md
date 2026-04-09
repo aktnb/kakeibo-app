@@ -2,10 +2,10 @@
 
 `apps/web` は残高の森の MVP 向け Next.js フロントエンドです。
 
-現状は以下の 2 モードで動きます。
+現状は API 接続前提の Web UI です。認証は以下の 2 モードで動きます。
 
-- `KAKEIBO_API_BASE_URL` と `KAKEIBO_BEARER_TOKEN` がある場合は API からデータ取得
-- 未設定の場合はモックデータで UI を表示
+- Firebase ログイン
+- ローカル debug ログイン
 
 ## Getting Started
 
@@ -27,10 +27,25 @@ pnpm dev
 
 ```bash
 KAKEIBO_API_BASE_URL=http://localhost:8080
-KAKEIBO_BEARER_TOKEN=your-firebase-id-token
+
+# Firebase ログイン
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+
+# ローカル debug ログイン
+KAKEIBO_DEBUG_UID=local-user
+KAKEIBO_DEBUG_DISPLAY_NAME=LocalUser
+NEXT_PUBLIC_KAKEIBO_DEBUG_AUTH_ENABLED=true
 ```
 
-Bearer token には Firebase Auth の ID token を使います。
+ローカル debug ログインを使う場合は、API 側でも `ALLOW_INSECURE_AUTH=true` が必要です。
+
+## 認証フロー
+
+- Firebase 設定がある場合: `/login` から Google ログインし、`/api/auth` 経由で `__session` cookie と API session を確立します
+- Firebase 未設定かつ debug 認証を有効にした場合: `/login` にローカルログインボタンが表示されます
+- cookie がない状態で保護ページへアクセスすると `/login` にリダイレクトされます
 
 ## Current Scope
 

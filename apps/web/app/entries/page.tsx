@@ -1,5 +1,6 @@
 import { createSession, getAccounts, getCategories, getEntries } from "../../lib/api";
 import type { Account, Category, Entry } from "../../lib/types";
+import LogoutButton from "../ui/LogoutButton";
 import EntryList from "./EntryList";
 
 function buildJSTMonth(): string {
@@ -37,8 +38,9 @@ export default async function EntriesPage() {
   return (
     <div className="min-h-screen">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <h1 className="text-lg font-bold tracking-tight text-slate-900">収支</h1>
+          <LogoutButton />
         </div>
       </header>
 

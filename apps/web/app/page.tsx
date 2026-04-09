@@ -1,4 +1,5 @@
 import { getDashboardData } from "../lib/api";
+import LogoutButton from "./ui/LogoutButton";
 
 function formatJPY(value: number): string {
   return new Intl.NumberFormat("ja-JP", {
@@ -39,6 +40,7 @@ export default async function Home() {
           <div className="flex items-center gap-3 text-sm">
             <span className="text-slate-400">{data.session.household.name}</span>
             <span className="font-semibold text-slate-700">{formatMonth(data.month)}</span>
+            <LogoutButton />
           </div>
         </div>
       </header>

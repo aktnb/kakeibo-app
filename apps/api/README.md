@@ -69,4 +69,6 @@ apps/api
 - `X-Debug-Firebase-Uid`
 - `X-Debug-Display-Name`
 
+この debug 認証は localhost からのリクエストだけを受け付ける。`X-Debug-Firebase-Uid` は `local:` prefix 付きで Web から送る前提にする。
+
 デプロイ関連は [deploy/README.md](/Users/aktnb/git/kakeibo-app/apps/api/deploy/README.md) を参照。

@@ -44,11 +44,7 @@ func NewService(
 func (s *Service) EnsureUser(ctx context.Context, in EnsureUserInput) (*EnsureUserOutput, error) {
 	existingUser, err := s.userRepo.GetByFirebaseUID(ctx, in.FirebaseUID)
 	if err == nil {
-		h, err := s.householdRepo.GetByID(ctx, existingUser.HouseholdID)
-		if err != nil {
-			return nil, err
-		}
-		return &EnsureUserOutput{User: existingUser, Household: h}, nil
+		return s.buildEnsureUserOutput(ctx, existingUser)
 	}
 	if err != repository.ErrNotFound {
 		return nil, err
@@ -76,7 +72,11 @@ func (s *Service) EnsureUser(ctx context.Context, in EnsureUserInput) (*EnsureUs
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		existingUser, getErr := s.userRepo.GetByFirebaseUID(ctx, in.FirebaseUID)
+		if getErr != nil {
+			return nil, err
+		}
+		return s.buildEnsureUserOutput(ctx, existingUser)
 	}
 
 	return out, nil
@@ -97,4 +97,13 @@ func (s *Service) GetCurrent(ctx context.Context, firebaseUID string) (*GetCurre
 		User:      u,
 		Household: h,
 	}, nil
+}
+
+func (s *Service) buildEnsureUserOutput(ctx context.Context, existingUser *domainuser.User) (*EnsureUserOutput, error) {
+	h, err := s.householdRepo.GetByID(ctx, existingUser.HouseholdID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &EnsureUserOutput{User: existingUser, Household: h}, nil
 }

@@ -38,8 +38,51 @@ func TestRequireAcceptsInsecureDebugHeaders(t *testing.T) {
 	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/me", nil)
+	req.Host = "localhost:8080"
 	req.Header.Set(auth.InsecureUIDHeader, "debug-user")
 	req.Header.Set(auth.InsecureDisplayNameHeader, "Debug User")
+	rec := httptest.NewRecorder()
+	next.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
+	}
+}
+
+func TestRequireRejectsInsecureDebugHeadersFromNonLocalHost(t *testing.T) {
+	t.Parallel()
+
+	mw := NewAuthMiddleware(auth.NewDisabledVerifier(), true)
+	next := mw.Require(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/me", nil)
+	req.Host = "example.com"
+	req.Header.Set(auth.InsecureUIDHeader, "debug-user")
+	rec := httptest.NewRecorder()
+	next.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusUnauthorized)
+	}
+}
+
+func TestRequireAcceptsInsecureDebugHeadersFromIPv6Loopback(t *testing.T) {
+	t.Parallel()
+
+	mw := NewAuthMiddleware(auth.NewDisabledVerifier(), true)
+	next := mw.Require(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		principal, ok := auth.PrincipalFromContext(r.Context())
+		if !ok || principal.FirebaseUID != "debug-user" {
+			t.Fatal("principal not found in context")
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/me", nil)
+	req.Host = "[::1]:8080"
+	req.Header.Set(auth.InsecureUIDHeader, "debug-user")
 	rec := httptest.NewRecorder()
 	next.ServeHTTP(rec, req)
 
