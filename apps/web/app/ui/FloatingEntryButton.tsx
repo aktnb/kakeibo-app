@@ -33,8 +33,8 @@ export default function FloatingEntryButton({ accounts, categories }: Props) {
             className="fixed inset-0 z-40 bg-black/50"
             onClick={() => setIsOpen(false)}
           />
-          {/* シート本体 */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl">
+          {/* モーダル本体 */}
+          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-slate-700">収支を登録</h2>
               <button
