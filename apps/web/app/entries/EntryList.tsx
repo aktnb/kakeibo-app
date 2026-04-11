@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { deleteEntryAction, updateEntryAction } from "./actions";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { deleteEntryAction } from "./actions";
 import EntryForm from "./EntryForm";
 import type { Account, ActionState, Category, Entry } from "../../lib/types";
 
@@ -31,40 +31,81 @@ function formatDateTime(rfc3339: string): string {
 
 const IDLE: ActionState = { status: "idle" };
 
-function DeleteButton({ entryId }: { entryId: string }) {
-  const [state, formAction, pending] = useActionState(deleteEntryAction, IDLE);
+function EntryMenu({ entry, onEdit }: { entry: Entry; onEdit: () => void }) {
+  const [open, setOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [, deleteAction, pending] = useActionState(deleteEntryAction, IDLE);
+  const ref = useRef<HTMLDivElement>(null);
 
-  if (confirming) {
-    return (
-      <form action={formAction} className="flex gap-1">
-        <input type="hidden" name="id" value={entryId} />
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-red-500 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
-        >
-          {pending ? "削除中" : "確認"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setConfirming(false)}
-          className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-500"
-        >
-          戻る
-        </button>
-      </form>
-    );
-  }
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setConfirming(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
   return (
-    <button
-      type="button"
-      onClick={() => setConfirming(true)}
-      className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-500 hover:border-red-200 hover:text-red-500"
-    >
-      削除
-    </button>
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100"
+        aria-label="メニュー"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="5" r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="12" cy="19" r="2" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-9 z-10 w-28 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+          {confirming ? (
+            <form action={deleteAction}>
+              <input type="hidden" name="id" value={entry.id} />
+              <p className="px-3 py-2 text-xs text-slate-500">削除しますか？</p>
+              <button
+                type="submit"
+                disabled={pending}
+                className="w-full px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
+              >
+                {pending ? "削除中..." : "削除する"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                className="w-full px-3 py-2 text-left text-xs text-slate-500 hover:bg-slate-50"
+              >
+                戻る
+              </button>
+            </form>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => { setOpen(false); onEdit(); }}
+                className="w-full px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+              >
+                編集
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirming(true)}
+                className="w-full px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50"
+              >
+                削除
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -110,21 +151,10 @@ export default function EntryList({ entries, accounts, categories }: Props) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <div className="text-right">
-                  <p className={`text-base font-bold tabular-nums ${isIncome ? "text-green-600" : "text-red-600"}`}>
-                    {isIncome ? "+" : "−"}{formatJPY(entry.amount)}
-                  </p>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setEditId(entry.id)}
-                    className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-500 hover:bg-slate-50"
-                  >
-                    編集
-                  </button>
-                  <DeleteButton entryId={entry.id} />
-                </div>
+                <p className={`text-base font-bold tabular-nums ${isIncome ? "text-green-600" : "text-red-600"}`}>
+                  {isIncome ? "+" : "−"}{formatJPY(entry.amount)}
+                </p>
+                <EntryMenu entry={entry} onEdit={() => setEditId(entry.id)} />
               </div>
             </div>
           );
