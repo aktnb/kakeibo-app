@@ -11,10 +11,11 @@ help:
 	@echo "  make test  # run Go tests"
 
 dev:
+	@$(MAKE) -C apps/api migrate
 	@$(MAKE) -j2 api web
 
 api:
-	@$(MAKE) -C apps/api dev
+	@$(MAKE) -C apps/api run
 
 web:
 	@cd apps/web && pnpm dev

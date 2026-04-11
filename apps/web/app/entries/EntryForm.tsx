@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { createEntryAction, updateEntryAction } from "./actions";
 import type { Account, ActionState, Category, Entry } from "../../lib/types";
 
@@ -48,8 +48,22 @@ export default function EntryForm({ accounts, categories, editTarget, onCancel, 
   const filteredCategories = selectedType === "income" ? incomeCategories : expenseCategories;
   const activeAccounts = accounts.filter((a) => !a.isArchived);
 
+  // onSubmit でブラウザ側（クライアント）で datetime-local → RFC3339 に変換する。
+  // Server Action 内では new Date() がサーバーの UTC で動くため、
+  // ブラウザのタイムゾーンを正確に反映できない。
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const raw = fd.get("occurredOn") as string;
+    if (raw) {
+      // ブラウザで実行されるので、new Date(raw) はローカル時刻として解釈される
+      fd.set("occurredOn", new Date(raw).toISOString());
+    }
+    startTransition(() => formAction(fd));
+  };
+
   return (
-    <form ref={formRef} action={formAction} className="space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
       {isEdit && <input type="hidden" name="id" value={editTarget.id} />}
 
       {/* 収支種別 */}

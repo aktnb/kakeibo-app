@@ -195,4 +195,4 @@ func (h *EntryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 func parseDate(value string) (time.Time, error) { return time.Parse(time.DateOnly, value) }
 
-func parseDateTime(value string) (time.Time, error) { return time.Parse(time.RFC3339, value) }
+func parseDateTime(value string) (time.Time, error) { return time.Parse(time.RFC3339Nano, value) }

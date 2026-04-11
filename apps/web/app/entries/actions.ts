@@ -4,13 +4,9 @@ import { revalidatePath } from "next/cache";
 import { createEntry, updateEntry, deleteEntry } from "../../lib/api";
 import type { ActionState, Entry } from "../../lib/types";
 
-const DATETIME_LOCAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+// toISOString() の形式: "2026-04-11T06:30:00.000Z"
+const ISO_UTC_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
 const MEMO_MAX_LENGTH = 200;
-
-function datetimeLocalToRFC3339(value: string): string {
-  // datetime-local はタイムゾーンなし文字列 → Date がローカル時刻として解釈する
-  return new Date(value).toISOString();
-}
 
 export async function createEntryAction(
   _prev: ActionState<Entry>,
@@ -22,11 +18,10 @@ export async function createEntryAction(
   }
   const type = typeRaw;
 
-  const occurredOnRaw = formData.get("occurredOn") as string;
-  if (!occurredOnRaw || !DATETIME_LOCAL_REGEX.test(occurredOnRaw)) {
+  const occurredOn = formData.get("occurredOn") as string;
+  if (!occurredOn || !ISO_UTC_REGEX.test(occurredOn)) {
     return { status: "error", message: "日時の形式が不正です" };
   }
-  const occurredOn = datetimeLocalToRFC3339(occurredOnRaw);
 
   const accountId = formData.get("accountId") as string;
   const categoryId = formData.get("categoryId") as string;
@@ -72,10 +67,9 @@ export async function updateEntryAction(
   }
 
   const occurredOnRaw = formData.get("occurredOn") as string | null;
-  if (occurredOnRaw && !DATETIME_LOCAL_REGEX.test(occurredOnRaw)) {
+  if (occurredOnRaw && !ISO_UTC_REGEX.test(occurredOnRaw)) {
     return { status: "error", message: "日時の形式が不正です" };
   }
-  const occurredOnConverted = occurredOnRaw ? datetimeLocalToRFC3339(occurredOnRaw) : undefined;
 
   const accountId = formData.get("accountId") as string | null;
   const categoryId = formData.get("categoryId") as string | null;
@@ -96,7 +90,7 @@ export async function updateEntryAction(
 
   try {
     const entry = await updateEntry(id, {
-      occurredOn: occurredOnConverted,
+      occurredOn: occurredOnRaw || undefined,
       accountId: accountId || undefined,
       categoryId: categoryId || undefined,
       amount,
