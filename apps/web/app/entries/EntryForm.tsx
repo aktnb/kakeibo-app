@@ -14,15 +14,18 @@ type Props = {
 
 const IDLE: ActionState<Entry> = { status: "idle" };
 
-function nowJST(): string {
-  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  return now.toISOString().slice(0, 16);
+function pad(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+function nowLocal(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function rfc3339ToDatetimeLocal(rfc3339: string): string {
-  const date = new Date(rfc3339);
-  const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-  return jst.toISOString().slice(0, 16);
+  const d = new Date(rfc3339);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export default function EntryForm({ accounts, categories, editTarget, onCancel, onSuccess }: Props) {
@@ -75,7 +78,7 @@ export default function EntryForm({ accounts, categories, editTarget, onCancel, 
         <input
           type="datetime-local"
           name="occurredOn"
-          defaultValue={editTarget?.occurredOn ? rfc3339ToDatetimeLocal(editTarget.occurredOn) : nowJST()}
+          defaultValue={editTarget?.occurredOn ? rfc3339ToDatetimeLocal(editTarget.occurredOn) : nowLocal()}
           required
           className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
         />

@@ -8,7 +8,8 @@ const DATETIME_LOCAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 const MEMO_MAX_LENGTH = 200;
 
 function datetimeLocalToRFC3339(value: string): string {
-  return `${value}:00+09:00`;
+  // datetime-local はタイムゾーンなし文字列 → Date がローカル時刻として解釈する
+  return new Date(value).toISOString();
 }
 
 export async function createEntryAction(
