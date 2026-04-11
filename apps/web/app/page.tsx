@@ -44,7 +44,7 @@ export default async function Home() {
           <KpiCard
             label="総残高"
             value={formatJPY(data.accountBalances.totalClosingBalance)}
-            color="blue"
+            color="default"
           />
           <KpiCard
             label="今月の収入"
@@ -213,10 +213,10 @@ export default async function Home() {
 
 // --- KPIカード ---
 
-type KpiColor = "blue" | "green" | "red";
+type KpiColor = "default" | "green" | "red";
 
 const kpiValueColor: Record<KpiColor, string> = {
-  blue: "text-blue-700",
+  default: "text-slate-900",
   green: "text-emerald-600",
   red: "text-red-600",
 };
