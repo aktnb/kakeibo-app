@@ -104,7 +104,7 @@ const entries: Entry[] = [
   {
     id: "ent_01",
     type: "income",
-    occurredOn: "2026-04-01",
+    occurredOn: "2026-04-01T09:00:00+09:00",
     accountId: "acc_bank",
     categoryId: "cat_salary",
     amount: 320000,
@@ -115,7 +115,7 @@ const entries: Entry[] = [
   {
     id: "ent_02",
     type: "expense",
-    occurredOn: "2026-04-03",
+    occurredOn: "2026-04-03T12:15:00+09:00",
     accountId: "acc_cash",
     categoryId: "cat_food",
     amount: 2800,
@@ -126,7 +126,7 @@ const entries: Entry[] = [
   {
     id: "ent_03",
     type: "expense",
-    occurredOn: "2026-04-05",
+    occurredOn: "2026-04-05T14:30:00+09:00",
     accountId: "acc_card",
     categoryId: "cat_home",
     amount: 6400,
@@ -137,7 +137,7 @@ const entries: Entry[] = [
   {
     id: "ent_04",
     type: "expense",
-    occurredOn: "2026-04-06",
+    occurredOn: "2026-04-06T12:30:00+09:00",
     accountId: "acc_cash",
     categoryId: "cat_food",
     amount: 1900,
@@ -148,7 +148,7 @@ const entries: Entry[] = [
   {
     id: "ent_05",
     type: "income",
-    occurredOn: "2026-04-07",
+    occurredOn: "2026-04-07T11:00:00+09:00",
     accountId: "acc_bank",
     categoryId: "cat_freelance",
     amount: 18000,

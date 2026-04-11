@@ -96,7 +96,7 @@ func (h *EntryHandler) Create(w http.ResponseWriter, r *http.Request) {
 		httpresponse.WriteError(w, http.StatusBadRequest, "validation_error", "invalid request body")
 		return
 	}
-	occurredOn, err := parseDate(req.OccurredOn)
+	occurredOn, err := parseDateTime(req.OccurredOn)
 	if err != nil {
 		httpresponse.WriteError(w, http.StatusBadRequest, "validation_error", "invalid occurredOn")
 		return
@@ -143,7 +143,7 @@ func (h *EntryHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	var occurredOn *time.Time
 	if req.OccurredOn != nil {
-		v, err := parseDate(*req.OccurredOn)
+		v, err := parseDateTime(*req.OccurredOn)
 		if err != nil {
 			httpresponse.WriteError(w, http.StatusBadRequest, "validation_error", "invalid occurredOn")
 			return
@@ -194,3 +194,5 @@ func (h *EntryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func parseDate(value string) (time.Time, error) { return time.Parse(time.DateOnly, value) }
+
+func parseDateTime(value string) (time.Time, error) { return time.Parse(time.RFC3339, value) }

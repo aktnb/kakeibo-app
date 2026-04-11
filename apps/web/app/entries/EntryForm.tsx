@@ -14,9 +14,15 @@ type Props = {
 
 const IDLE: ActionState<Entry> = { status: "idle" };
 
-function todayJST(): string {
+function nowJST(): string {
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  return now.toISOString().slice(0, 10);
+  return now.toISOString().slice(0, 16);
+}
+
+function rfc3339ToDatetimeLocal(rfc3339: string): string {
+  const date = new Date(rfc3339);
+  const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return jst.toISOString().slice(0, 16);
 }
 
 export default function EntryForm({ accounts, categories, editTarget, onCancel, onSuccess }: Props) {
@@ -63,13 +69,13 @@ export default function EntryForm({ accounts, categories, editTarget, onCancel, 
         ))}
       </div>
 
-      {/* 日付 */}
+      {/* 日時 */}
       <div>
-        <label className="mb-1 block text-xs font-semibold text-slate-500">日付</label>
+        <label className="mb-1 block text-xs font-semibold text-slate-500">日時</label>
         <input
-          type="date"
+          type="datetime-local"
           name="occurredOn"
-          defaultValue={editTarget?.occurredOn ?? todayJST()}
+          defaultValue={editTarget?.occurredOn ? rfc3339ToDatetimeLocal(editTarget.occurredOn) : nowJST()}
           required
           className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
         />

@@ -4,8 +4,12 @@ import { revalidatePath } from "next/cache";
 import { createEntry, updateEntry, deleteEntry } from "../../lib/api";
 import type { ActionState, Entry } from "../../lib/types";
 
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const DATETIME_LOCAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 const MEMO_MAX_LENGTH = 200;
+
+function datetimeLocalToRFC3339(value: string): string {
+  return `${value}:00+09:00`;
+}
 
 export async function createEntryAction(
   _prev: ActionState<Entry>,
@@ -17,10 +21,11 @@ export async function createEntryAction(
   }
   const type = typeRaw;
 
-  const occurredOn = formData.get("occurredOn") as string;
-  if (!occurredOn || !DATE_REGEX.test(occurredOn)) {
-    return { status: "error", message: "日付の形式が不正です" };
+  const occurredOnRaw = formData.get("occurredOn") as string;
+  if (!occurredOnRaw || !DATETIME_LOCAL_REGEX.test(occurredOnRaw)) {
+    return { status: "error", message: "日時の形式が不正です" };
   }
+  const occurredOn = datetimeLocalToRFC3339(occurredOnRaw);
 
   const accountId = formData.get("accountId") as string;
   const categoryId = formData.get("categoryId") as string;
@@ -66,9 +71,10 @@ export async function updateEntryAction(
   }
 
   const occurredOnRaw = formData.get("occurredOn") as string | null;
-  if (occurredOnRaw && !DATE_REGEX.test(occurredOnRaw)) {
-    return { status: "error", message: "日付の形式が不正です" };
+  if (occurredOnRaw && !DATETIME_LOCAL_REGEX.test(occurredOnRaw)) {
+    return { status: "error", message: "日時の形式が不正です" };
   }
+  const occurredOnConverted = occurredOnRaw ? datetimeLocalToRFC3339(occurredOnRaw) : undefined;
 
   const accountId = formData.get("accountId") as string | null;
   const categoryId = formData.get("categoryId") as string | null;
@@ -89,7 +95,7 @@ export async function updateEntryAction(
 
   try {
     const entry = await updateEntry(id, {
-      occurredOn: occurredOnRaw || undefined,
+      occurredOn: occurredOnConverted,
       accountId: accountId || undefined,
       categoryId: categoryId || undefined,
       amount,

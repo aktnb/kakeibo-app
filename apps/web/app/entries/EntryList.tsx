@@ -19,6 +19,17 @@ function formatJPY(value: number): string {
   }).format(value);
 }
 
+function formatDateTime(rfc3339: string): string {
+  const date = new Date(rfc3339);
+  const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const y = jst.getUTCFullYear();
+  const m = String(jst.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(jst.getUTCDate()).padStart(2, "0");
+  const h = String(jst.getUTCHours()).padStart(2, "0");
+  const min = String(jst.getUTCMinutes()).padStart(2, "0");
+  return `${y}/${m}/${d} ${h}:${min}`;
+}
+
 const IDLE: ActionState = { status: "idle" };
 
 function DeleteButton({ entryId }: { entryId: string }) {
@@ -104,7 +115,7 @@ export default function EntryList({ entries, accounts, categories }: Props) {
                   {category?.name ?? "未分類"}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-400">
-                  {entry.occurredOn}・{account?.name ?? "不明な口座"}
+                  {formatDateTime(entry.occurredOn)}・{account?.name ?? "不明な口座"}
                   {entry.memo ? `・${entry.memo}` : ""}
                 </p>
               </div>

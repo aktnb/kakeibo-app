@@ -22,7 +22,7 @@ func NewEntry(e domainentry.Entry) Entry {
 	return Entry{
 		ID:         e.ID,
 		Type:       string(e.Type),
-		OccurredOn: e.OccurredOn.Format(time.DateOnly),
+		OccurredOn: e.OccurredOn.Format(time.RFC3339),
 		AccountID:  e.AccountID,
 		CategoryID: e.CategoryID,
 		Amount:     e.Amount,
