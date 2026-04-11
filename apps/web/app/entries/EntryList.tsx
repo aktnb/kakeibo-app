@@ -79,66 +79,87 @@ export default function EntryList({ entries, accounts, categories }: Props) {
     );
   }
 
-  return (
-    <div className="divide-y divide-slate-100">
-      {entries.map((entry) => {
-        const category = categoriesById.get(entry.categoryId);
-        const account = accountsById.get(entry.accountId);
-        const isIncome = entry.type === "income";
-        const dotColor = category?.color ?? (isIncome ? "#16a34a" : "#ef4444");
+  const editEntry = entries.find((e) => e.id === editId) ?? null;
 
-        if (editId === entry.id) {
+  return (
+    <>
+      <div className="divide-y divide-slate-100">
+        {entries.map((entry) => {
+          const category = categoriesById.get(entry.categoryId);
+          const account = accountsById.get(entry.accountId);
+          const isIncome = entry.type === "income";
+          const dotColor = category?.color ?? (isIncome ? "#16a34a" : "#ef4444");
+
           return (
-            <div key={entry.id} className="py-4">
-              <EntryForm
-                accounts={accounts}
-                categories={categories}
-                editTarget={entry}
-                onCancel={() => setEditId(null)}
-              />
+            <div key={entry.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+              <div className="flex items-center gap-3">
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                  style={{ backgroundColor: dotColor }}
+                >
+                  {(category?.name ?? "？")[0]}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {category?.name ?? "未分類"}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {formatDateTime(entry.occurredOn)}・{account?.name ?? "不明な口座"}
+                    {entry.memo ? `・${entry.memo}` : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-right">
+                  <p className={`text-base font-bold tabular-nums ${isIncome ? "text-green-600" : "text-red-600"}`}>
+                    {isIncome ? "+" : "−"}{formatJPY(entry.amount)}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditId(entry.id)}
+                    className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-500 hover:bg-slate-50"
+                  >
+                    編集
+                  </button>
+                  <DeleteButton entryId={entry.id} />
+                </div>
+              </div>
             </div>
           );
-        }
+        })}
+      </div>
 
-        return (
-          <div key={entry.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-            <div className="flex items-center gap-3">
-              <span
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                style={{ backgroundColor: dotColor }}
+      {/* 編集モーダル */}
+      {editEntry && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50"
+            onClick={() => setEditId(null)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-slate-700">収支を編集</h2>
+              <button
+                onClick={() => setEditId(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100"
+                aria-label="閉じる"
               >
-                {(category?.name ?? "？")[0]}
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-slate-800">
-                  {category?.name ?? "未分類"}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-400">
-                  {formatDateTime(entry.occurredOn)}・{account?.name ?? "不明な口座"}
-                  {entry.memo ? `・${entry.memo}` : ""}
-                </p>
-              </div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="text-right">
-                <p className={`text-base font-bold tabular-nums ${isIncome ? "text-green-600" : "text-red-600"}`}>
-                  {isIncome ? "+" : "−"}{formatJPY(entry.amount)}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <button
-                  type="button"
-                  onClick={() => setEditId(entry.id)}
-                  className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-500 hover:bg-slate-50"
-                >
-                  編集
-                </button>
-                <DeleteButton entryId={entry.id} />
-              </div>
-            </div>
+            <EntryForm
+              accounts={accounts}
+              categories={categories}
+              editTarget={editEntry}
+              onCancel={() => setEditId(null)}
+            />
           </div>
-        );
-      })}
-    </div>
+        </>
+      )}
+    </>
   );
 }
