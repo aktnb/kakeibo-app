@@ -35,11 +35,15 @@ export default function EntryForm({ accounts, categories, editTarget, onCancel, 
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state.status === "success" && !isEdit) {
-      formRef.current?.reset();
-      onSuccess?.();
+    if (state.status === "success") {
+      if (isEdit) {
+        onCancel?.();
+      } else {
+        formRef.current?.reset();
+        onSuccess?.();
+      }
     }
-  }, [state, isEdit, onSuccess]);
+  }, [state, isEdit, onCancel, onSuccess]);
 
   const defaultType = editTarget?.type ?? "expense";
   const [selectedType, setSelectedType] = useState<"income" | "expense">(defaultType);
