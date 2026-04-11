@@ -1,6 +1,5 @@
 import { createSession, getAccounts, getCategories, getEntries } from "../../lib/api";
 import type { Account, Category, Entry } from "../../lib/types";
-import LogoutButton from "../ui/LogoutButton";
 import EntryList from "./EntryList";
 
 function buildJSTMonth(): string {
@@ -37,14 +36,8 @@ export default async function EntriesPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <h1 className="text-lg font-bold tracking-tight text-slate-900">収支</h1>
-          <LogoutButton />
-        </div>
-      </header>
-
       <div className="mx-auto max-w-7xl space-y-4 p-4 sm:p-6">
+        <h1 className="text-xl font-bold text-slate-900">収支</h1>
         {apiError && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
             API に接続できません。<code className="mx-1 rounded bg-amber-100 px-1 text-xs">make dev</code> で API を起動してください。

@@ -1,5 +1,4 @@
 import { getDashboardData } from "../lib/api";
-import LogoutButton from "./ui/LogoutButton";
 
 function formatJPY(value: number): string {
   return new Intl.NumberFormat("ja-JP", {
@@ -26,26 +25,19 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* ヘッダー */}
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold tracking-tight text-slate-900">残高の森</h1>
+      <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-700">{formatMonth(data.month)}</span>
+            <span className="text-slate-300">·</span>
+            <span className="text-sm text-slate-400">{data.session.household.name}</span>
             {data.source === "mock" && (
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
                 モック
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-slate-400">{data.session.household.name}</span>
-            <span className="font-semibold text-slate-700">{formatMonth(data.month)}</span>
-            <LogoutButton />
-          </div>
         </div>
-      </header>
-
-      <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
 
         {/* KPIカード */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
