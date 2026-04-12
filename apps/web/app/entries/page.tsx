@@ -1,13 +1,6 @@
-import { createSession, getAccounts, getCategories, getEntries } from "../../lib/api";
+import { buildJSTMonth, createSession, getAccounts, getCategories, getEntries } from "../../lib/api";
 import type { Account, Category, Entry } from "../../lib/types";
 import EntryList from "./EntryList";
-
-function buildJSTMonth(): string {
-  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const year = now.getUTCFullYear();
-  const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
-}
 
 export default async function EntriesPage() {
   const month = buildJSTMonth();
