@@ -7,7 +7,6 @@ import type {
   CreateAccountRequest,
   CreateCategoryRequest,
   CreateEntryRequest,
-  DashboardData,
   Entry,
   EntryListParams,
   MonthlyTotals,
@@ -36,7 +35,7 @@ function getDebugFirebaseUID(): string {
   return `local:${DEBUG_UID!}`;
 }
 
-function buildJSTMonth(): string {
+export function buildJSTMonth(): string {
   // JST = UTC+9
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
   const year = now.getUTCFullYear();
@@ -166,45 +165,25 @@ export async function deleteEntry(id: string): Promise<void> {
   return request<void>({ path: `/api/v1/entries/${id}`, method: "DELETE" });
 }
 
-// --- ダッシュボード ---
+// --- サマリー ---
 
-export async function getDashboardData(): Promise<DashboardData> {
-  const month = buildJSTMonth();
-  const from = `${month}-01`;
-  const [year, mon] = month.split("-").map(Number);
-  const lastDay = new Date(year, mon, 0).getDate();
-  const to = `${month}-${String(lastDay).padStart(2, "0")}`;
+export async function getMonthlyTotals(month: string): Promise<MonthlyTotals> {
+  return request<MonthlyTotals>({
+    path: "/api/v1/summary/monthly-totals",
+    searchParams: { month },
+  });
+}
 
-  const session = await createSession();
+export async function getCategoryBreakdown(month: string): Promise<CategoryBreakdown> {
+  return request<CategoryBreakdown>({
+    path: "/api/v1/summary/category-breakdown",
+    searchParams: { month, type: "expense" },
+  });
+}
 
-  const [accounts, categories, entries, monthlyTotals, categoryBreakdown, accountBalances] =
-    await Promise.all([
-      getAccounts(),
-      getCategories(),
-      getEntries({ from, to, pageSize: 20 }),
-      request<MonthlyTotals>({
-        path: "/api/v1/summary/monthly-totals",
-        searchParams: { month },
-      }),
-      request<CategoryBreakdown>({
-        path: "/api/v1/summary/category-breakdown",
-        searchParams: { month, type: "expense" },
-      }),
-      request<AccountBalances>({
-        path: "/api/v1/summary/account-balances",
-        searchParams: { month },
-      }),
-    ]);
-
-  return {
-    month,
-    source: "api",
-    session,
-    accounts,
-    categories,
-    entries,
-    monthlyTotals,
-    categoryBreakdown,
-    accountBalances,
-  };
+export async function getAccountBalances(month: string): Promise<AccountBalances> {
+  return request<AccountBalances>({
+    path: "/api/v1/summary/account-balances",
+    searchParams: { month },
+  });
 }

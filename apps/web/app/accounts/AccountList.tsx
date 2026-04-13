@@ -3,25 +3,12 @@
 import { useActionState, useState } from "react";
 import { archiveAccountAction } from "./actions";
 import AccountForm from "./AccountForm";
+import { accountTypeLabel } from "../ui/AccountTypeIcon";
+import { formatJPY } from "../../lib/formatters";
 import type { Account, ActionState } from "../../lib/types";
 
 type Props = {
   accounts: Account[];
-};
-
-function formatJPY(value: number): string {
-  return new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: "JPY",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-const typeLabel: Record<string, string> = {
-  bank: "銀行口座",
-  cash: "現金",
-  credit: "クレジット",
-  ewallet: "電子マネー",
 };
 
 const IDLE: ActionState<Account> = { status: "idle" };
@@ -70,7 +57,7 @@ export default function AccountList({ accounts }: Props) {
       >
         <div>
           <p className="font-semibold text-slate-800">{account.name}</p>
-          <p className="mt-0.5 text-xs text-slate-400">{typeLabel[account.type] ?? account.type}</p>
+          <p className="mt-0.5 text-xs text-slate-400">{accountTypeLabel(account.type)}</p>
         </div>
         <div className="flex items-center gap-2">
           <p className="text-base font-bold tabular-nums text-slate-900">

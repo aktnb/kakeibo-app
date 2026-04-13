@@ -11,10 +11,6 @@ export default function LogoutButton() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
 
-  if (pathname === "/login") {
-    return null;
-  }
-
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
@@ -25,6 +21,10 @@ export default function LogoutButton() {
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, []);
+
+  if (pathname === "/login") {
+    return null;
+  }
 
   async function handleLogout() {
     if (isFirebaseConfigured && firebaseAuth?.currentUser) {

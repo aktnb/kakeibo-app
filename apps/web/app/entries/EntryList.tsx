@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { deleteEntryAction } from "./actions";
 import EntryForm from "./EntryForm";
+import { formatJPY, formatDateTime } from "../../lib/formatters";
 import type { Account, ActionState, Category, Entry } from "../../lib/types";
 
 type Props = {
@@ -10,24 +11,6 @@ type Props = {
   accounts: Account[];
   categories: Category[];
 };
-
-function formatJPY(value: number): string {
-  return new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: "JPY",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function formatDateTime(rfc3339: string): string {
-  const d = new Date(rfc3339);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  const h = String(d.getHours()).padStart(2, "0");
-  const min = String(d.getMinutes()).padStart(2, "0");
-  return `${y}/${m}/${day} ${h}:${min}`;
-}
 
 const IDLE: ActionState = { status: "idle" };
 
