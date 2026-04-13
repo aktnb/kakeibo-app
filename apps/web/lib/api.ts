@@ -113,8 +113,11 @@ export async function getMe(): Promise<Session> {
 
 // --- 口座 ---
 
-export async function getAccounts(): Promise<Account[]> {
-  return request<Account[]>({ path: "/api/v1/accounts" });
+export async function getAccounts(includeArchived = false): Promise<Account[]> {
+  return request<Account[]>({
+    path: "/api/v1/accounts",
+    searchParams: includeArchived ? { includeArchived: "true" } : undefined,
+  });
 }
 
 export async function createAccount(body: CreateAccountRequest): Promise<Account> {

@@ -90,7 +90,7 @@ export default function AccountList({ accounts }: Props) {
         </details>
       )}
       {accounts.length === 0 && (
-        <p className="py-8 text-center text-sm text-slate-400">口座がありません</p>
+        <p className="py-8 text-center text-sm text-slate-400">資産がありません</p>
       )}
     </div>
   );

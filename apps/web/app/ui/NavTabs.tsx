@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const tabs = [
   { label: "ホーム", href: "/" },
   { label: "収支", href: "/entries" },
-  { label: "口座", href: "/accounts" },
+  { label: "資産", href: "/accounts" },
   { label: "カテゴリ", href: "/categories" },
 ];
 

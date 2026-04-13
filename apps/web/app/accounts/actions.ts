@@ -15,7 +15,7 @@ export async function createAccountAction(
   const openingBalanceRaw = formData.get("openingBalance") as string;
 
   if (!name || name.length > NAME_MAX_LENGTH) {
-    return { status: "error", message: `口座名は${NAME_MAX_LENGTH}文字以内で入力してください` };
+    return { status: "error", message: `資産名は${NAME_MAX_LENGTH}文字以内で入力してください` };
   }
   if (typeRaw !== "bank" && typeRaw !== "cash" && typeRaw !== "credit" && typeRaw !== "ewallet") {
     return { status: "error", message: "種別が不正です" };
@@ -47,7 +47,7 @@ export async function updateAccountAction(
     return { status: "error", message: "IDが不正です" };
   }
   if (name && name.length > NAME_MAX_LENGTH) {
-    return { status: "error", message: `口座名は${NAME_MAX_LENGTH}文字以内で入力してください` };
+    return { status: "error", message: `資産名は${NAME_MAX_LENGTH}文字以内で入力してください` };
   }
 
   try {

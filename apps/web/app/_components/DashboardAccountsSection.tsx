@@ -6,7 +6,7 @@ export default function DashboardAccountsSection({ accountBalances }: { accountB
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5">
       <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-400">
-        口座残高
+        資産残高
       </h2>
       <div className="space-y-2">
         {accountBalances.items.map((account) => {

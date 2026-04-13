@@ -42,7 +42,7 @@ export default function AccountForm({ editTarget, onCancel }: Props) {
 
       {/* 口座名 */}
       <div>
-        <label className="mb-1 block text-xs font-semibold text-slate-500">口座名</label>
+        <label className="mb-1 block text-xs font-semibold text-slate-500">資産名</label>
         <input
           type="text"
           name="name"
